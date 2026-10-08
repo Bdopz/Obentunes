@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace Obentunes;
 
-[BepInPlugin("com.bdopz.obentunes", "Obentunes", "1.0")]
+[BepInPlugin("com.bdopz.obentunes", "Obentunes", "1.0.0")]
 public class Plugin : BaseUnityPlugin
 {
     internal static ManualLogSource Log;

@@ -1,0 +1,124 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using AssetsTools.NET.Extra;
+
+namespace Obentunes;
+
+public class GameClipRef(string name, string displayName, string resourceFile, long offset, int size)
+{
+    public string Name { get; } = name;
+    public string DisplayName { get; } = displayName;
+    public string ResourceFile { get; } = resourceFile;
+    public long Offset { get; } = offset;
+    public int Size { get; } = size;
+}
+
+public static class Probe
+{
+    private static readonly Dictionary<string, string> TrackNames = new(StringComparer.Ordinal)
+    {
+        ["radio_nain_on_marjat"] = "Nain On Marjat",
+        ["radio_internet_cafe_001"] = "Internet Cafe",
+        ["radio_rob"] = "Rob-In B&R",
+        ["radio_welho"] = "Welho",
+        ["radio_broken_001"] = "Broken",
+        ["radio_kurahaara"] = "Kurahaara",
+        ["radio_general_store"] = "One Stop Shop",
+        ["radio_casino_001"] = "Casino 1",
+        ["radio_casino_002_b"] = "Casino 2",
+        ["radio_hilla"] = "Hilla",
+        
+        ["radio_003"] = "Unknown 1",
+        ["radio_004"] = "Unknown 2",
+        ["radio_005"] = "Unknown 3",
+        ["radio_006"] = "Unknown 4",
+        ["radio_007"] = "Unknown 5",
+        ["radio_008"] = "Tenement B",
+        ["radio_009"] = "Malone",
+        ["radio_010"] = "Samuel",
+        ["radio_011"] = "Kolhola 1",
+        ["radio_012"] = "Kolhola 2",
+        ["radio_013"] = "Kolhola 3",
+        ["radio_014"] = "Fredrik",
+        ["radio_015"] = "Tenement A 1",
+        ["radio_016"] = "Lantern Factory",
+        ["radio_017"] = "Tenement A 2",
+        ["radio_018"] = "Pickaxe Motel",
+        ["radio_019"] = "Mines Canteen",
+        ["radio_020"] = "Mines Office",
+        ["radio_021"] = "Ivar Pihl",
+        ["radio_022"] = "Mines Break Room",
+        ["radio_023"] = "OS Mining Services",
+        ["radio_024"] = "Ken Nakahara",
+        ["radio_025"] = "Mines Market",
+        ["radio_026"] = "Mines Service Area",
+        ["radio_027"] = "Rosso Instant Art",
+        ["radio_028b"] = "Elektroniks",
+        ["radio_029"] = "Rocket Ramen",
+        ["radio_030"] = "Fungi Boutique",
+        ["radio_031"] = "General Store",
+        ["radio_032"] = "Metal Shop",
+        ["radio_033"] = "Sewerview Inn",
+        ["radio_035"] = "Alco",
+        ["radio_036"] = "Bakery",
+        ["radio_039"] = "Toy Trains",
+        ["radio_040"] = "J Kiosk",
+        ["radio_041"] = "Bazaar Bar 1",
+        ["radio_042"] = "Bazaar Bar 2",
+        ["radio_043"] = "Ratfighting",
+        ["radio_045"] = "Aziz's",
+        ["radio_046"] = "Bazaar Sauna",
+        ["radio_047"] = "Scatola Di Maccheroni",
+    };
+
+    private static string _pluginPath;
+    private static string _dataPath;
+
+    public static void Init(string dataPath, string pluginPath)
+    {
+        _dataPath = dataPath;
+        _pluginPath = pluginPath;
+    }
+
+    public static List<GameClipRef> Build()
+    {
+        var result = new List<GameClipRef>();
+        var unmapped = new List<string>();
+        var am = new AssetsManager();
+        am.LoadClassPackage(Path.Combine(_pluginPath, "classdata.tpk"));
+
+        foreach (string file in Directory.GetFiles(_dataPath, "sharedassets*.assets"))
+        {
+            var inst = am.LoadAssetsFile(file);
+            am.LoadClassDatabaseFromPackage(inst.file.Metadata.UnityVersion);
+
+            foreach (var info in inst.file.GetAssetsOfType(AssetClassID.AudioClip))
+            {
+                var bf = am.GetBaseField(inst, info);
+                string name = bf["m_Name"].AsString;
+
+                if (!TrackNames.TryGetValue(name, out string displayName))
+                {
+                    if (name.StartsWith("radio_")) unmapped.Add(name);
+                    continue;
+                }
+
+                var res = bf["m_Resource"];
+                result.Add(new GameClipRef(
+                    name,
+                    displayName,
+                    Path.GetFileName(res["m_Source"].AsString),
+                    res["m_Offset"].AsLong,
+                    (int)res["m_Size"].AsLong));
+            }
+            am.UnloadAssetsFile(file);
+        }
+
+        if (unmapped.Count <= 0) return result;
+        unmapped.Sort(StringComparer.Ordinal);
+        Plugin.Log.LogInfo($"Unmapped radio_ clips ({unmapped.Count}): {string.Join(", ", unmapped)}");
+
+        return result;
+    }
+}

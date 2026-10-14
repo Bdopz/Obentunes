@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Obentunes
 {
-    [BepInPlugin("com.bdopz.obentunes", "Obentunes", "1.0.0")]
+    [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
     public class Plugin : BaseUnityPlugin
     {
         internal static ManualLogSource Log;
@@ -21,7 +21,7 @@ namespace Obentunes
             Log = Logger;
             Probe.Init(Application.dataPath, Path.Combine(Paths.BepInExRootPath, "plugins", "Obentunes"));
 
-            _harmony = new Harmony("com.bdopz.obentunes");
+            _harmony = new Harmony(MyPluginInfo.PLUGIN_GUID);
             _harmony.UnpatchSelf();
         
             gameObject.AddComponent<RadioMenu>();

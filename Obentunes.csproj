@@ -2,83 +2,67 @@
 
   <PropertyGroup>
     <AssemblyName>Obentunes</AssemblyName>
-    <Product>$(AssemblyName)</Product>
-    <LangVersion>latest</LangVersion>
-    <Version>1.0.0</Version>
-    <ManagedDir>C:\Program Files (x86)\Steam\steamapps\common\Obenseuer\Obenseuer_Data\Managed</ManagedDir>
-    <TargetFramework>netstandard2.1</TargetFramework>
-    <DisableHandlePackageFileConflicts>true</DisableHandlePackageFileConflicts>
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <DebugType>embedded</DebugType>
+    <GUID>bdopz.obentunes</GUID>
+    <Product>Obentunes</Product>
+    <Version>1.1.0</Version>
 
-    <NoWarn>$(NoWarn);MSB3277</NoWarn>
+    <RestoreAdditionalProjectSources>
+      https://api.nuget.org/v3/index.json;
+      https://nuget.bepinex.dev/v3/index.json
+    </RestoreAdditionalProjectSources>
+
+    <GameDir Condition="'$(GameDir)' == ''">C:\Program Files (x86)\Steam\steamapps\common\Obenseuer</GameDir>
+    <ManagedDir>$(GameDir)\Obenseuer_Data\Managed</ManagedDir>
+    <BepInExDir>$(GameDir)\BepInEx\core</BepInExDir>
+    <PluginsDir>$(GameDir)\BepInEx\plugins</PluginsDir>
+
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <DebugType>embedded</DebugType>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+
+    <NoStdLib>true</NoStdLib>
+    <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+    <FrameworkPathOverride>$(ManagedDir)</FrameworkPathOverride>
   </PropertyGroup>
 
-  <Target Name="CopyToScripts" AfterTargets="Build">
-    <Copy SourceFiles="$(TargetPath)" DestinationFolder="C:\Program Files (x86)\Steam\steamapps\common\Obenseuer\BepInEx\plugins\Obentunes" />
+  <ItemDefinitionGroup>
+    <Reference>
+      <Private>false</Private>
+    </Reference>
+  </ItemDefinitionGroup>
+
+  <Target Name="CopyToGame" AfterTargets="Build">
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(GameDir)\BepInEx\plugins\$(AssemblyName)"/>
   </Target>
 
   <ItemGroup>
-    <PackageReference Include="BepInEx.Core" Version="5.4.*" />
-    <PackageReference Include="BepInEx.Analyzers" PrivateAssets="all" Version="1.*" />
-    <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.3" PrivateAssets="all" />
+    <Reference Include="$(ManagedDir)\mscorlib.dll"/>
+    <Reference Include="$(ManagedDir)\netstandard.dll"/>
+    <Reference Include="$(ManagedDir)\System.dll"/>
+    <Reference Include="$(ManagedDir)\System.Core.dll"/>
+
+    <Reference Include="$(ManagedDir)\UnityEngine.dll"/>
+    <Reference Include="$(ManagedDir)\UnityEngine.CoreModule.dll"/>
+    <Reference Include="$(ManagedDir)\Unity.InputSystem.dll"/>
+    <Reference Include="$(ManagedDir)\UnityEngine.IMGUIModule.dll"/>
+    <Reference Include="$(ManagedDir)\UnityEngine.AudioModule.dll"/>
+    <Reference Include="$(ManagedDir)\UnityEngine.UnityWebRequestModule.dll"/>
+    <Reference Include="$(ManagedDir)\UnityEngine.UnityWebRequestAudioModule.dll"/>
+    <Reference Include="$(ManagedDir)\UnityEngine.TextRenderingModule.dll"/>
+
+    <Reference Include="$(ManagedDir)\Assembly-CSharp.dll" Publicize="true"/>
+    <Reference Include="$(ManagedDir)\Assembly-CSharp-firstpass.dll" Publicize="true"/>
+
+    <Reference Include="$(BepInExDir)\BepInEx.dll"/>
+    <Reference Include="$(BepInExDir)\0Harmony.dll"/>
+    <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.3" PrivateAssets="all"/>
+    <PackageReference Include="BepInEx.Analyzers" Version="1.0.8" PrivateAssets="all"/>
+    <PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0"/>
+
+    <PackageReference Include="Costura.Fody" Version="6.2.0" PrivateAssets="all" />
     <PackageReference Include="AssetsTools.NET" Version="3.0.5" />
-    <PackageReference Include="Costura.Fody" Version="6.2.0">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="Fmod5Sharp" Version="3.0.1" />
-    <PackageReference Include="System.Buffers" Version="4.6.1" GeneratePathProperty="true" />
-    <PackageReference Include="System.Text.Json" Version="6.0.10" />
-  </ItemGroup>
-
-  <Target Name="EmbedSystemBuffers" BeforeTargets="FodyTarget">
-    <ItemGroup>
-      <ReferenceCopyLocalPaths Include="$(PkgSystem_Buffers)\lib\netstandard2.0\System.Buffers.dll" />
-    </ItemGroup>
-  </Target>
-
-  <ItemGroup>
-    <Reference Include="Assembly-CSharp" Publicize="true">
-      <HintPath>$(ManagedDir)\Assembly-CSharp.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="UnityEngine">
-      <HintPath>$(ManagedDir)\UnityEngine.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="UnityEngine.CoreModule">
-      <HintPath>$(ManagedDir)\UnityEngine.CoreModule.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="UnityEngine.JSONSerializeModule">
-      <HintPath>$(ManagedDir)\UnityEngine.JSONSerializeModule.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="Unity.InputSystem">
-      <HintPath>$(ManagedDir)\Unity.InputSystem.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="UnityEngine.IMGUIModule">
-      <HintPath>$(ManagedDir)\UnityEngine.IMGUIModule.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="UnityEngine.AudioModule">
-      <HintPath>$(ManagedDir)\UnityEngine.AudioModule.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="UnityEngine.UnityWebRequestModule">
-      <HintPath>$(ManagedDir)\UnityEngine.UnityWebRequestModule.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="UnityEngine.UnityWebRequestAudioModule">
-      <HintPath>$(ManagedDir)\UnityEngine.UnityWebRequestAudioModule.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="UnityEngine.TextRenderingModule">
-      <HintPath>$(ManagedDir)\UnityEngine.TextRenderingModule.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
+    <PackageReference Include="Fmod5Sharp" Version="3.1.0" />
   </ItemGroup>
 
   <ItemGroup>

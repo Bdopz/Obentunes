@@ -15,10 +15,10 @@ namespace Obentunes
     public static class ClipFetcher
     {
         private static bool _indexed;
-        private static List<GameClipRef> _clips;
+        private static List<ClipRef> _clips;
         private static readonly Dictionary<string, AudioClip> Loaded = new();
     
-        public static IReadOnlyList<GameClipRef> Clips => _clips;
+        public static IReadOnlyList<ClipRef> Clips => _clips;
     
         public static void IndexClips()
         {
@@ -52,23 +52,37 @@ namespace Obentunes
                 yield break;
             }
         
-            var gameClip = _clips?.FirstOrDefault(c => c.Name == name);
-            if (gameClip == null) { Plugin.Log.LogWarning($"{name} not in index"); yield break; }
+            var clipRef = _clips?.FirstOrDefault(c => c.Name == name);
+            if (clipRef == null) { Plugin.Log.LogWarning($"{name} not in index"); yield break; }
         
             string dataPath = Application.dataPath;
             string cacheDir = Path.Combine(Paths.CachePath, "Obentunes");
-        
-            var task = Task.Run(() => ExtractToCache(gameClip, dataPath, cacheDir));
-            while (!task.IsCompleted) yield return null;
 
-            if (task.IsFaulted || task.Result == null)
-            {
-                Plugin.Log.LogError($"Extract failed: {task.Exception}"); 
-                yield break;
-            }
-        
-            string path = task.Result;
+            string path;
             AudioClip clip;
+
+            switch (clipRef)
+            {
+                case GameClipRef gameClipRef:
+                {
+                    var task = Task.Run(() => ExtractToCache(gameClipRef, dataPath, cacheDir));
+                    while (!task.IsCompleted) yield return null;
+
+                    if (task.IsFaulted || task.Result == null)
+                    {
+                        Plugin.Log.LogError($"Extract failed: {task.Exception}");
+                        yield break;
+                    }
+        
+                    path = task.Result;
+                    break;
+                }
+                case CustomClipRef customClipRef:
+                    path = customClipRef.Path;
+                    break;
+                
+                default: yield break;
+            }
             
             try
             {
@@ -87,7 +101,7 @@ namespace Obentunes
             }
             finally
             {
-                File.Delete(path);
+                if (clipRef is GameClipRef) File.Delete(path);
             }
         
             clip.name = name;

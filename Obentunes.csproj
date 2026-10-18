@@ -39,7 +39,8 @@
     </ItemGroup>
     
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(BuildDir)"/>
-    <Copy SourceFiles="@(ResFiles)" DestinationFolder="$(BuildDir)\res" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(ResFiles)" DestinationFolder="$(BuildDir)\res" SkipUnchangedFiles="true"/>
+    <MakeDir Directories="$(BuildDir)\custom"/>
   </Target>
 
   <ItemGroup>

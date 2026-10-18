@@ -13,7 +13,7 @@ namespace Obentunes
         private bool _open;
     
         private Vector2 _scroll;
-        private List<GameClipRef> _tracks;
+        private List<ClipRef> _tracks;
         private string _loading;
         private string _track;
         private readonly Dictionary<string, string> _custom = new();
@@ -69,11 +69,11 @@ namespace Obentunes
 
         private void BuildSongs()
         {
-            var all = ClipFetcher.Clips;
-            if (all == null) return; // still indexing
+            var clips = ClipFetcher.Clips;
+            if (clips == null) return; // still indexing
 
-            _tracks = all
-                .OrderBy(c => c.DisplayName)
+            _tracks = clips
+                .OrderBy(clip => clip.DisplayName)
                 .ToList();
         }
 

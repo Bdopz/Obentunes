@@ -7,24 +7,6 @@ using Newtonsoft.Json;
 
 namespace Obentunes
 {
-    public class GameClipRef
-    {
-        public GameClipRef(string name, string displayName, string resourceFile, long offset, int size)
-        {
-            Name = name;
-            DisplayName = displayName;
-            ResourceFile = resourceFile;
-            Offset = offset;
-            Size = size;
-        }
-
-        public string Name { get; }
-        public string DisplayName { get; }
-        public string ResourceFile { get; }
-        public long Offset { get; }
-        public int Size { get; }
-    }
-
     public static class Probe
     {
         private static readonly IReadOnlyList<string> ClipKeywords = new[] { "radio_", "music_" }; 
@@ -42,10 +24,12 @@ namespace Obentunes
                 File.ReadAllText(Path.Combine(_resPath, "TrackNames.json")));
         }
 
-        public static List<GameClipRef> Build()
+        public static List<ClipRef> Build()
         {
-            var result = new List<GameClipRef>();
+            var result = new List<ClipRef>();
             var unmapped = new List<string>();
+            
+            // Game Clips
             
             var manager = new AssetsManager();
             manager.LoadClassPackage(Path.Combine(_resPath, "classdata.tpk"));
@@ -86,6 +70,22 @@ namespace Obentunes
             {
                 unmapped.Sort(StringComparer.Ordinal);
                 Plugin.Log.LogInfo($"Unmapped radio_ clips ({unmapped.Count}): {string.Join(", ", unmapped)}");
+            }
+            
+            // Custom Clips
+
+            string customDir = Path.Combine(_pluginPath, "custom");
+            
+            if (Directory.Exists(customDir))
+            {
+                string[] extensions = { ".wav", ".ogg" };
+
+                foreach (string file in Directory.GetFiles(customDir)
+                             .Where(f => extensions.Contains(Path.GetExtension(f).ToLowerInvariant())))
+                {
+                    string name = Path.GetFileNameWithoutExtension(file);
+                    result.Add(new CustomClipRef(name, name, file));
+                }
             }
 
             return result;

@@ -14,9 +14,16 @@ namespace Obentunes
 {
     public static class ClipFetcher
     {
+        private static readonly Dictionary<string, AudioClip> Loaded = new();
+        internal static readonly Dictionary<string, AudioType> Formats =
+            new(StringComparer.OrdinalIgnoreCase)
+            {
+                { ".wav", AudioType.WAV },
+                { ".ogg", AudioType.OGGVORBIS }
+            };
+        
         private static bool _indexed;
         private static List<ClipRef> _clips;
-        private static readonly Dictionary<string, AudioClip> Loaded = new();
     
         public static IReadOnlyList<ClipRef> Clips => _clips;
     
@@ -84,10 +91,14 @@ namespace Obentunes
                 default: yield break;
             }
             
+            if (!Formats.TryGetValue(Path.GetExtension(path), out var type))
+            {
+                Plugin.Log.LogError($"Unsupported audio format: {path}");
+                yield break;
+            }
+            
             try
             {
-                var type = Path.GetExtension(path).ToLowerInvariant() == ".wav" ? AudioType.WAV : AudioType.OGGVORBIS;
-
                 using var req = UnityWebRequestMultimedia.GetAudioClip(new Uri(path).AbsoluteUri, type);
                 yield return req.SendWebRequest();
 

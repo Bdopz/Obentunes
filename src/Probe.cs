@@ -78,11 +78,10 @@ namespace Obentunes
             
             if (Directory.Exists(customDir))
             {
-                string[] extensions = { ".wav", ".ogg" };
-
-                foreach (string file in Directory.GetFiles(customDir)
-                             .Where(f => extensions.Contains(Path.GetExtension(f).ToLowerInvariant())))
+                foreach (string file in Directory.GetFiles(customDir))
                 {
+                    if (!ClipFetcher.Formats.ContainsKey(Path.GetExtension(file))) continue;
+
                     string name = Path.GetFileNameWithoutExtension(file);
                     result.Add(new CustomClipRef(name, name, file));
                 }

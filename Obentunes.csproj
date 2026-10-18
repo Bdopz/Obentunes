@@ -15,6 +15,7 @@
     <ManagedDir>$(GameDir)\Obenseuer_Data\Managed</ManagedDir>
     <BepInExDir>$(GameDir)\BepInEx\core</BepInExDir>
     <PluginsDir>$(GameDir)\BepInEx\plugins</PluginsDir>
+    <BuildDir>$(GameDir)\BepInEx\plugins\$(AssemblyName)</BuildDir>
 
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>9.0</LangVersion>
@@ -33,7 +34,12 @@
   </ItemDefinitionGroup>
 
   <Target Name="CopyToGame" AfterTargets="Build">
-    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(GameDir)\BepInEx\plugins\$(AssemblyName)"/>
+    <ItemGroup>
+      <ResFiles Include="$(MSBuildProjectDirectory)\res\**\*.*"/>
+    </ItemGroup>
+    
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(BuildDir)"/>
+    <Copy SourceFiles="@(ResFiles)" DestinationFolder="$(BuildDir)\res" SkipUnchangedFiles="true" />
   </Target>
 
   <ItemGroup>
@@ -50,6 +56,7 @@
     <Reference Include="$(ManagedDir)\UnityEngine.UnityWebRequestModule.dll"/>
     <Reference Include="$(ManagedDir)\UnityEngine.UnityWebRequestAudioModule.dll"/>
     <Reference Include="$(ManagedDir)\UnityEngine.TextRenderingModule.dll"/>
+    <Reference Include="$(ManagedDir)\Newtonsoft.Json.dll"/>
 
     <Reference Include="$(ManagedDir)\Assembly-CSharp.dll" Publicize="true"/>
     <Reference Include="$(ManagedDir)\Assembly-CSharp-firstpass.dll" Publicize="true"/>
@@ -63,10 +70,6 @@
     <PackageReference Include="Costura.Fody" Version="6.2.0" PrivateAssets="all" />
     <PackageReference Include="AssetsTools.NET" Version="3.0.5" />
     <PackageReference Include="Fmod5Sharp" Version="3.1.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="classdata.tpk" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

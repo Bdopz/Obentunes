@@ -56,21 +56,20 @@ namespace Obentunes
             if (gameClip == null) { Plugin.Log.LogWarning($"{name} not in index"); yield break; }
         
             string dataPath = Application.dataPath;
-            string cacheDir = Path.Combine(Paths.CachePath, "Obentunes", "temp");
+            string cacheDir = Path.Combine(Paths.CachePath, "Obentunes");
         
             var task = Task.Run(() => ExtractToCache(gameClip, dataPath, cacheDir));
             while (!task.IsCompleted) yield return null;
 
-            if (task.IsFaulted)
+            if (task.IsFaulted || task.Result == null)
             {
                 Plugin.Log.LogError($"Extract failed: {task.Exception}"); 
                 yield break;
             }
         
             string path = task.Result;
-            if (path == null) yield break;
-        
             AudioClip clip;
+            
             try
             {
                 var type = Path.GetExtension(path).ToLowerInvariant() == ".wav" ? AudioType.WAV : AudioType.OGGVORBIS;
@@ -88,7 +87,7 @@ namespace Obentunes
             }
             finally
             {
-                try { File.Delete(path); } catch { ; }
+                File.Delete(path);
             }
         
             clip.name = name;

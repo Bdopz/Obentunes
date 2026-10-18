@@ -15,7 +15,7 @@
     <ManagedDir>$(GameDir)\Obenseuer_Data\Managed</ManagedDir>
     <BepInExDir>$(GameDir)\BepInEx\core</BepInExDir>
     <PluginsDir>$(GameDir)\BepInEx\plugins</PluginsDir>
-    <BuildDir>$(GameDir)\BepInEx\plugins\$(AssemblyName)</BuildDir>
+    <BuildDir>$(PluginsDir)\$(AssemblyName)</BuildDir>
 
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>9.0</LangVersion>

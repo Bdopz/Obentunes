@@ -15,6 +15,7 @@
     <ManagedDir>$(GameDir)\Obenseuer_Data\Managed</ManagedDir>
     <BepInExDir>$(GameDir)\BepInEx\core</BepInExDir>
     <PluginsDir>$(GameDir)\BepInEx\plugins</PluginsDir>
+    <ScriptsDir>$(GameDir)\BepInEx\scripts</ScriptsDir>
     <BuildDir>$(PluginsDir)\$(AssemblyName)</BuildDir>
 
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -38,7 +39,7 @@
       <ResFiles Include="$(MSBuildProjectDirectory)\res\**\*.*"/>
     </ItemGroup>
     
-    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(BuildDir)"/>
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ScriptsDir)"/>
     <Copy SourceFiles="@(ResFiles)" DestinationFolder="$(BuildDir)\res" SkipUnchangedFiles="true"/>
     <MakeDir Directories="$(BuildDir)\custom"/>
   </Target>
